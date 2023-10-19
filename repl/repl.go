@@ -22,11 +22,11 @@ func Start(in io.Reader, out io.Writer) {
 
 	for {
 		fmt.Fprint(out, PROMPT)
+
 		scanned := scanner.Scan()
 		if !scanned {
 			return
 		}
-
 		line := scanner.Text()
 		l := lexer.New(line)
 		p := parser.New(l)
@@ -36,7 +36,6 @@ func Start(in io.Reader, out io.Writer) {
 			printParserErrors(out, p.Errors())
 			continue
 		}
-
 		evaluated := evaluator.Eval(program, env)
 		if evaluated != nil {
 			io.WriteString(out, evaluated.Inspect())
