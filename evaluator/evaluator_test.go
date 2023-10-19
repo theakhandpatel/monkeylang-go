@@ -83,6 +83,8 @@ func TestEvalBooleanExpression(t *testing.T) {
 		{"(1 > 2) == false", true},
 		{`"Hello" == "Hello"`, true},
 		{`"Hello" == "World"`, false},
+		{`"Hello" != "World"`, true},
+		{`"Hello" != "Hello"`, false},
 	}
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
@@ -95,6 +97,7 @@ func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 		t.Errorf("object is not Boolean. got=%T (%+v)", obj, obj)
 		return false
 	}
+
 	if result.Value != expected {
 		t.Errorf("object has wrong value. got=%t, want=%t", result.Value, expected)
 		return false
@@ -338,25 +341,34 @@ func TestStringConcatenation(t *testing.T) {
 	}
 }
 
-// // TODO: Add Test for String equality check
-// func TestStringEqulity(t *testing.T) {
-// 	tests := []struct {
-// 		input    string
-// 		expected bool
-// 	}{
-// 		{`"Hello" == "Hello"`, true},
-// 		{`"Hello" == "World"`, false},
-// 	}
+func TestBuiltinFunctions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`len("")`, 0},
+		{`len("four")`, 4},
+		{`len("hello world")`, 11},
+		{`len("four" + "five_")`, 9},
+		{`len(1)`, "argument to `len` not supported, got INTEGER"},
+		{`len("one", "two")`, "wrong number of arguments. got=2, want=1"},
+	}
 
-// 	for _, tt := range tests {
-// 		evaluated := testEval(tt.input)
-// 		, ok := evaluated.(*object.Boolean)
-// 		if !ok {
-// 			t.Fatalf("object is not String. got=%T (%+v)", evaluated, evaluated)
-// 		}
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
 
-// 		if str.Value != tt.expected {
-// 			t.Errorf("String has wrong value. got=%q", str.Value)
-// 		}
-// 	}
-// }
+		switch expected := tt.expected.(type) {
+		case int:
+			testIntegerObject(t, evaluated, int64(expected))
+		case string:
+			errObj, ok := evaluated.(*object.Error)
+			if !ok {
+				t.Errorf("object is not Error. got=%T (%+v)", evaluated, evaluated)
+				continue
+			}
+			if errObj.Message != expected {
+				t.Errorf("wrong error message. expected=%q, got=%q", expected, errObj.Message)
+			}
+		}
+	}
+}
