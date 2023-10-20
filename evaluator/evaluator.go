@@ -40,6 +40,13 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		if isError(val) {
 			return val
 		}
+		// TODO:
+		// check if variable is already there in the environment if yes, then cant set the value and return NewError
+		// else set the value in the environment and return the value
+		// if _, ok := env.Get(node.Name.Value); ok {
+		// 	return newError("variable already declared: %s", node.Name.Value)
+		// }
+
 		env.Set(node.Name.Value, val)
 
 	case *ast.Identifier:
@@ -152,18 +159,6 @@ func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) obje
 	return result
 }
 
-func evalStatements(stmts []ast.Statement, env *object.Environment) object.Object {
-	var result object.Object
-
-	for _, statement := range stmts {
-		result = Eval(statement, env)
-		if returnValue, ok := result.(*object.ReturnValue); ok {
-			return returnValue.Value
-		}
-	}
-	return result
-}
-
 func nativeBoolToBooleanObject(input bool) *object.Boolean {
 	if input {
 		return TRUE
@@ -203,10 +198,7 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 	return &object.Integer{Value: -value}
 }
 
-func evalInfixExpression(
-	operator string,
-	left, right object.Object,
-) object.Object {
+func evalInfixExpression(operator string, left, right object.Object) object.Object {
 	switch {
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
@@ -223,10 +215,7 @@ func evalInfixExpression(
 	}
 }
 
-func evalIntegerInfixExpression(
-	operator string,
-	left, right object.Object,
-) object.Object {
+func evalIntegerInfixExpression(operator string, left, right object.Object) object.Object {
 	leftVal := left.(*object.Integer).Value
 	rightVal := right.(*object.Integer).Value
 	switch operator {

@@ -110,7 +110,7 @@ var builtins = map[string]*object.Builtin{
 				out += arg.Inspect()
 			}
 			println(out)
-			return NULL
+			return nil
 		},
 	},
 }
