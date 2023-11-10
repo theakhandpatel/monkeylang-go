@@ -10,27 +10,24 @@ import (
 func TestNextToken(t *testing.T) {
 	input := `let five = 5;
 	let ten = 10;
-	
 	let add = fn(x, y) {
-		x + y;
+	x + y;
 	};
-	
 	let result = add(five, ten);
 	!-/*5;
 	5 < 10 > 5;
-	
 	if (5 < 10) {
-		return true;
+	return true;
 	} else {
-		return false;
+	return false;
 	}
-	
 	10 == 10;
 	10 != 9;
 	"foobar"
 	"foo bar"
 	[1, 2];
 	{"foo": "bar"}
+	macro(x, y) { x + y; };
 	`
 
 	tests := []struct {
@@ -123,6 +120,19 @@ func TestNextToken(t *testing.T) {
 		{token.COLON, ":"},
 		{token.STRING, "bar"},
 		{token.RBRACE, "}"},
+		{token.MACRO, "macro"},
+		{token.LPAREN, "("},
+		{token.IDENT, "x"},
+		{token.COMMA, ","},
+		{token.IDENT, "y"},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.IDENT, "x"},
+		{token.PLUS, "+"},
+		{token.IDENT, "y"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
+		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
 
